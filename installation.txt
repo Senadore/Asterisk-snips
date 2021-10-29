@@ -1,0 +1,65 @@
+Install Asterisk on Ubuntu: 
+
+sudo apt update
+sudo apt install wget build-essential subversion
+
+cd /usr/src/
+sudo wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-17-current.tar.gz
+
+sudo tar zxf asterisk-17-current.tar.gz
+cd asterisk-17.*/
+sudo contrib/scripts/get_mp3_source.sh
+sudo contrib/scripts/install_prereq install
+
+sudo ./configure
+
+sudo make menuselect
+**select format_mp3
+exit
+
+sudo make -j2
+
+sudo make install
+
+sudo make samples
+sudo make basic-pbx
+
+sudo make config
+sudo ldconfig
+
+DONE: 
+
+Creating Asterisk User: 
+
+udo addgroup --quiet --system asterisk
+sudo adduser --quiet --system --ingroup asterisk --no-create-home --disabled-password asterisk
+
+sudo nano /etc/default/asterisk
+
+# Startup configuration for the Asterisk daemon
+
+# Uncomment the following and set them to the user/groups that you
+# want to run Asterisk as. NOTE: this requires substantial work to
+# be sure that Asterisk's environment has permission to write the
+# files required  for  its  operation, including logs, its comm
+# socket, the asterisk database, etc.
+AST_USER="asterisk"
+AST_GROUP="asterisk"
+
+
+sudo usermod -a -G dialout,audio asterisk
+
+
+sudo chown -R asterisk: /var/{lib,log,run,spool}/asterisk /usr/lib/asterisk /etc/asterisk
+sudo chmod -R 750 /var/{lib,log,run,spool}/asterisk /usr/lib/asterisk /etc/asterisk
+
+Starting Asterisk: 
+
+sudo systemctl enable asterisk
+sudo systemctl start asterisk
+
+sudo asterisk -vvvr
+
+sudo ufw allow 5060/udp
+
+sudo ufw allow 10000:20000/udp
